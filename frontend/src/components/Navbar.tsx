@@ -20,6 +20,9 @@ function Navbar() {
         <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
           Dashboard
         </Link>
+        <Link to="/upload-resume" className="text-gray-600 hover:text-gray-900">
+  Upload Resume
+</Link>
       </div>
     </nav>
   )

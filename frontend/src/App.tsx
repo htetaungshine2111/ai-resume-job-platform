@@ -5,6 +5,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import ProtectedRoute from './components/ProtectedRoute'
+import ResumeUpload from './pages/ResumeUpload'
+
 function App() {
   return (
     <BrowserRouter>
@@ -22,6 +24,14 @@ function App() {
       </ProtectedRoute>
     }
   />
+  <Route
+  path="/upload-resume"
+  element={
+    <ProtectedRoute>
+      <ResumeUpload />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   )
