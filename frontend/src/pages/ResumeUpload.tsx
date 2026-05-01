@@ -3,17 +3,32 @@ import { useState } from 'react'
 function ResumeUpload() {
   const [file, setFile] = useState<File | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
 
-    if (!file) {
-      alert('Please select a resume file')
-      return
-    }
-
-    console.log('Selected file:', file)
-    alert('Resume selected successfully')
+  if (!file) {
+    alert('Please select a resume file')
+    return
   }
+
+  const formData = new FormData()
+  formData.append('resume', file)
+
+  const res = await fetch('http://localhost:5000/upload-resume', {
+    method: 'POST',
+    body: formData,
+  })
+
+  const data = await res.json()
+
+  if (!res.ok) {
+    alert(data.message)
+    return
+  }
+
+  console.log(data)
+  alert('Resume uploaded successfully')
+}
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">

@@ -13,8 +13,23 @@ const prisma = new PrismaClient({ adapter })
 const bcrypt = require('bcrypt')
 
 const jwt = require('jsonwebtoken')
+const multer = require('multer')
+const path = require('path')
 
 const app = express()
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/')
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + '-' + file.originalname
+    cb(null, uniqueName)
+  },
+})
+
+const upload = multer({ storage })
+
 
 app.use(cors())
 app.use(express.json())
@@ -112,4 +127,16 @@ app.post('/register', async (req, res) => {
       message: 'Registration failed',
     })
   }
+})
+
+
+app.post('/upload-resume', upload.single('resume'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' })
+  }
+
+  res.json({
+    message: 'Resume uploaded successfully',
+    file: req.file,
+  })
 })
