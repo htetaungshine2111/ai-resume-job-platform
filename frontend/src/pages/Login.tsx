@@ -1,9 +1,5 @@
 import { useState } from 'react'
 
-
-
-
-
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -15,13 +11,22 @@ function Login() {
   const res = await fetch('http://localhost:5000/login', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ email, password }),
   })
 
   const data = await res.json()
-  console.log(data)
+
+  if (!res.ok) {
+    alert(data.message)
+    return
+  }
+
+  localStorage.setItem('token', data.token)
+  localStorage.setItem('user', JSON.stringify(data.user))
+
+  window.location.href = '/dashboard'
 }
 
 
