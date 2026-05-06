@@ -6,8 +6,9 @@ function Register() {
   const [password, setPassword] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  e.preventDefault()
 
+  try {
     const res = await fetch('http://localhost:5000/register', {
       method: 'POST',
       headers: {
@@ -17,8 +18,20 @@ function Register() {
     })
 
     const data = await res.json()
-    console.log(data)
+
+    if (!res.ok) {
+      alert(data.message || 'Registration failed')
+      return
+    }
+
+    alert(data.message || 'Registration successful')
+
+    window.location.href = '/login'
+  } catch (error) {
+    console.error(error)
+    alert('Something went wrong. Please try again.')
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

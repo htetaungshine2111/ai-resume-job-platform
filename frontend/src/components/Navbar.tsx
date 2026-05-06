@@ -26,6 +26,12 @@ function Navbar() {
 <Link to="/job-match" className="text-gray-600 hover:text-gray-900">
   Job Match
 </Link>
+<Link
+  to="/job-match-history"
+  className="text-gray-600 hover:text-gray-900"
+>
+  Match History
+</Link>
         <Link to="/history">History</Link>
       </div>
     </nav>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { saveAuth } from '../utils/auth'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -23,8 +24,7 @@ function Login() {
     return
   }
 
-  localStorage.setItem('token', data.token)
-  localStorage.setItem('user', JSON.stringify(data.user))
+  saveAuth(data.token, data.user)
 
   window.location.href = '/dashboard'
 }

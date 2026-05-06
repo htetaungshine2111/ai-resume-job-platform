@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import ResumeUpload from './pages/ResumeUpload'
 import History from './pages/History'
 import JobMatch from './pages/JobMatch'
+import JobMatchHistory from './pages/JobMatchHistory'
 
 function App() {
   return (
@@ -48,6 +49,15 @@ function App() {
   element={
     <ProtectedRoute>
       <JobMatch />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/job-match-history"
+  element={
+    <ProtectedRoute>
+      <JobMatchHistory />
     </ProtectedRoute>
   }
 />
