@@ -23,6 +23,10 @@ function Navbar() {
         <Link to="/upload-resume" className="text-gray-600 hover:text-gray-900">
   Upload Resume
 </Link>
+<Link to="/job-match" className="text-gray-600 hover:text-gray-900">
+  Job Match
+</Link>
+        <Link to="/history">History</Link>
       </div>
     </nav>
   )

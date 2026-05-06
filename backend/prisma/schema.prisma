@@ -13,3 +13,16 @@ model User {
   password  String
   createdAt DateTime @default(now())
 }
+
+
+model ResumeAnalysis {
+  id            Int      @id @default(autoincrement())
+  fileName      String
+  resumeText    String
+  summary       String
+  skills        String[]
+  missingSkills String[]
+  suggestions   String[]
+  jobRoles      String[]
+  createdAt     DateTime @default(now())
+}

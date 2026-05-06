@@ -6,6 +6,8 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import ResumeUpload from './pages/ResumeUpload'
+import History from './pages/History'
+import JobMatch from './pages/JobMatch'
 
 function App() {
   return (
@@ -32,6 +34,24 @@ function App() {
     </ProtectedRoute>
   }
 />
+  <Route
+  path="/history"
+  element={
+    <ProtectedRoute>
+      <History />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/job-match"
+  element={
+    <ProtectedRoute>
+      <JobMatch />
+    </ProtectedRoute>
+  }
+/>
+
       </Routes>
     </BrowserRouter>
   )

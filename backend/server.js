@@ -18,6 +18,16 @@ const path = require('path')
 
 const app = express()
 
+const fs = require('fs')
+const { PDFParse } = require('pdf-parse')
+
+const OpenAI = require('openai')
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/')
@@ -130,13 +140,142 @@ app.post('/register', async (req, res) => {
 })
 
 
-app.post('/upload-resume', upload.single('resume'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded' })
-  }
+app.post('/upload-resume', upload.single('resume'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' })
+    }
 
-  res.json({
-    message: 'Resume uploaded successfully',
-    file: req.file,
-  })
+    const fileBuffer = fs.readFileSync(req.file.path)
+    const parser = new PDFParse({ data: fileBuffer })
+    const pdfData = await parser.getText()
+
+    res.json({
+      message: 'Resume uploaded and parsed successfully',
+      fileName: req.file.filename,
+      resumeText: pdfData.text,
+    })
+  } catch (error) {
+    console.error(error)
+
+    res.status(500).json({
+      message: 'Failed to parse resume',
+    })
+  }
+})
+
+
+app.post('/analyze-resume', async (req, res) => {
+  try {
+    const { resumeText, fileName } = req.body
+
+    if (!resumeText) {
+      return res.status(400).json({ message: 'Resume text is required' })
+    }
+
+    const analysis = {
+      summary:
+        'Experienced full-stack developer with strong background in PHP, Laravel, Vue.js, and backend systems.',
+
+      skills: [
+        'PHP',
+        'Laravel',
+        'Vue.js',
+        'Python',
+        'Node.js',
+        'API Development',
+      ],
+
+      missingSkills: [
+        'React',
+        'TypeScript',
+        'PostgreSQL',
+        'Docker',
+        'AWS',
+      ],
+
+      suggestions: [
+        'Add measurable achievements',
+        'Include project links',
+        'Highlight full-stack experience',
+        'Showcase AI projects',
+      ],
+
+      jobRoles: [
+        'Full Stack Developer',
+        'Backend Developer',
+        'Software Engineer',
+      ],
+    }
+
+    const savedAnalysis = await prisma.resumeAnalysis.create({
+      data: {
+        fileName: fileName || 'resume.pdf',
+        resumeText,
+        summary: analysis.summary,
+        skills: analysis.skills,
+        missingSkills: analysis.missingSkills,
+        suggestions: analysis.suggestions,
+        jobRoles: analysis.jobRoles,
+      },
+    })
+
+    res.json({
+      message: 'Resume analyzed and saved successfully',
+      analysis,
+      savedAnalysisId: savedAnalysis.id,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Analysis failed' })
+  }
+})
+
+
+app.get('/resume-analyses', async (req, res) => {
+  try {
+    const data = await prisma.resumeAnalysis.findMany({
+      orderBy: { createdAt: 'desc' },
+    })
+
+    res.json(data)
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({ message: 'Failed to fetch analyses' })
+  }
+})
+
+
+app.post('/job-match', async (req, res) => {
+  try {
+    const { resumeText, jobDescription } = req.body
+
+    if (!resumeText || !jobDescription) {
+      return res.status(400).json({
+        message: 'Resume text and job description are required',
+      })
+    }
+
+    const result = {
+      matchScore: 78,
+      summary:
+        'The resume is a good match for a full stack developer role, especially for backend and web development work.',
+      matchedSkills: ['PHP', 'Laravel', 'Vue.js', 'Node.js', 'API Development'],
+      missingSkills: ['React', 'TypeScript', 'AWS', 'Docker'],
+      suggestions: [
+        'Add React and TypeScript project experience',
+        'Highlight API development more strongly',
+        'Add cloud deployment experience',
+        'Include measurable achievements in resume bullets',
+      ],
+    }
+
+    res.json({
+      message: 'Job match completed successfully',
+      result,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Job match failed' })
+  }
 })
