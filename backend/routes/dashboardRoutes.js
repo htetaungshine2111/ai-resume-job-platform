@@ -1,59 +1,53 @@
-const express = require('express')
-const prisma = require('../prismaClient')
+const express = require("express");
+const prisma = require("../prismaClient");
+const authMiddleware = require("../middleware/authMiddleware");
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/dashboard-stats', async (req, res) => {
+router.get("/dashboard-stats", authMiddleware, async (req, res) => {
   try {
-    const totalResumes =
-      await prisma.resumeAnalysis.count()
+    const totalResumes = await prisma.resumeAnalysis.count();
 
-    const totalMatches =
-      await prisma.jobMatch.count()
+    const totalMatches = await prisma.jobMatch.count();
 
-    const matches =
-      await prisma.jobMatch.findMany()
+    const matches = await prisma.jobMatch.findMany();
 
     const averageMatchScore =
       matches.length === 0
         ? 0
         : Math.round(
-            matches.reduce(
-              (sum, item) =>
-                sum + item.matchScore,
-              0
-            ) / matches.length
-          )
+            matches.reduce((sum, item) => sum + item.matchScore, 0) /
+              matches.length,
+          );
 
     const chartData = [
       {
-        name: 'Resume Analyses',
+        name: "Resume Analyses",
         score: totalResumes,
       },
       {
-        name: 'Job Matches',
+        name: "Job Matches",
         score: totalMatches,
       },
       {
-        name: 'Avg Match Score',
+        name: "Avg Match Score",
         score: averageMatchScore,
       },
-    ]
+    ];
 
     res.json({
       totalResumes,
       totalMatches,
       averageMatchScore,
       chartData,
-    })
+    });
   } catch (error) {
-    console.error(error)
+    console.error(error);
 
     res.status(500).json({
-      message:
-        'Failed to fetch dashboard stats',
-    })
+      message: "Failed to fetch dashboard stats",
+    });
   }
-})
+});
 
-module.exports = router
+module.exports = router;
