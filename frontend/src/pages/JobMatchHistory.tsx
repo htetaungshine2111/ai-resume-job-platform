@@ -1,125 +1,155 @@
-import { useEffect, useState } from 'react'
+import { useState } from "react";
+import MatchScoreBar from "../components/MatchScoreBar";
+import SkillList from "../components/SkillList";
+import Modal from "../components/Modal";
+import useJobMatches from "../hooks/useJobMatches";
+import toast from "react-hot-toast";
+import Spinner from "../components/Spinner";
+import { api } from "../services/api";
 
 type JobMatch = {
-  id: number
-  matchScore: number
-  matchedSkills: string[]
-  missingSkills: string[]
-  suggestions: string[]
-  createdAt: string
-}
+  id: number;
+  matchScore: number;
+  matchedSkills: string[];
+  missingSkills: string[];
+  suggestions: string[];
+  createdAt: string;
+};
 
 function JobMatchHistory() {
-  const [matches, setMatches] = useState<JobMatch[]>([])
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMatch, setSelectedMatch] = useState<JobMatch | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  //const [matches, setMatches] = useState<JobMatch[]>([]);
+  //const [totalPages, setTotalPages] = useState(1);
+  //const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch('http://localhost:5000/job-matches')
-      .then((res) => res.json())
-      .then((data) => setMatches(data))
-      .catch((error) => console.error(error))
-  }, [])
+  const { matches, loading, totalPages, setMatches } =
+    useJobMatches(currentPage);
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
-const handleDelete = async (id: number) => {
-  const confirmed = confirm('Are you sure you want to delete this record?')
+  const handleDelete = async (id: number) => {
+    const confirmed = confirm("Are you sure you want to delete this record?");
 
-  if (!confirmed) return
+    if (!confirmed) return;
+    await api.deleteJobMatch(id);
 
-  const res = await fetch(`http://localhost:5000/job-matches/${id}`, {
-    method: 'DELETE',
-  })
+    toast.success("Job match deleted successfully");
 
-  const data = await res.json()
+    setMatches(matches.filter((match) => match.id !== id));
+  };
 
-  if (!res.ok) {
-    alert(data.message || 'Delete failed')
-    return
-  }
+  const filteredMatches = matches.filter((match) => {
+    const search = searchTerm.toLowerCase();
 
-  setMatches(matches.filter((match) => match.id !== id))
-}
+    return (
+      match.matchedSkills.some((skill) =>
+        skill.toLowerCase().includes(search),
+      ) ||
+      match.missingSkills.some((skill) => skill.toLowerCase().includes(search))
+    );
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
-        <h1 className="text-2xl font-bold mb-6">
-          Job Match History
-        </h1>
+        <h1 className="text-2xl font-bold mb-6">Job Match History</h1>
 
-        {matches.length === 0 && (
-          <p>No job match history yet.</p>
-        )}
+        <input
+          type="text"
+          placeholder="Search skills..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full border rounded-lg p-3 mb-6"
+        />
 
-        {matches.map((match) => (
+        {loading && <Spinner />}
+
+        {filteredMatches.length === 0 && <p>No job match history yet.</p>}
+
+        {filteredMatches.map((match) => (
           <div
             key={match.id}
-            className="border rounded-lg p-4 mb-4"
+            onClick={() => setSelectedMatch(match)}
+            className="border rounded-lg p-4 mb-4 cursor-pointer hover:bg-gray-50"
           >
-<button
-  onClick={() => handleDelete(match.id)}
-  className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
->
-  Delete
-</button>
+            {selectedMatch && (
+              <Modal
+                title="Job Match Details"
+                onClose={() => setSelectedMatch(null)}
+              >
+                <p className="mb-4">
+                  <strong>Match Score:</strong> {selectedMatch.matchScore}%
+                </p>
 
-            
-            <div className="mb-4">
-  <div className="flex justify-between mb-1">
-    <span className="font-bold">Match Score</span>
+                <SkillList
+                  title="Matched Skills"
+                  skills={selectedMatch.matchedSkills}
+                />
 
-    <span className="font-bold">
-      {match.matchScore}%
-    </span>
-  </div>
+                <SkillList
+                  title="Missing Skills"
+                  skills={selectedMatch.missingSkills}
+                />
 
-  <div className="w-full bg-gray-200 rounded-full h-4">
-    <div
-      className="bg-green-500 h-4 rounded-full"
-      style={{
-        width: `${match.matchScore}%`,
-      }}
-    ></div>
-  </div>
-</div>
+                <SkillList
+                  title="Suggestions"
+                  skills={selectedMatch.suggestions}
+                />
+              </Modal>
+            )}
+
+            <button
+              onClick={(event) => {
+                event.stopPropagation();
+                handleDelete(match.id);
+              }}
+              className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Delete
+            </button>
+
+            <MatchScoreBar score={match.matchScore} />
 
             <p className="text-sm text-gray-500 mb-3">
               {new Date(match.createdAt).toLocaleString()}
             </p>
 
-            <div className="mb-3">
-              <strong>Matched Skills:</strong>
+            <SkillList title="Matched Skills" skills={match.matchedSkills} />
 
-              <ul className="list-disc ml-6">
-                {match.matchedSkills.map((skill, i) => (
-                  <li key={i}>{skill}</li>
-                ))}
-              </ul>
-            </div>
+            <SkillList title="Missing Skills" skills={match.missingSkills} />
 
-            <div className="mb-3">
-              <strong>Missing Skills:</strong>
-
-              <ul className="list-disc ml-6">
-                {match.missingSkills.map((skill, i) => (
-                  <li key={i}>{skill}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <strong>Suggestions:</strong>
-
-              <ul className="list-disc ml-6">
-                {match.suggestions.map((s, i) => (
-                  <li key={i}>{s}</li>
-                ))}
-              </ul>
-            </div>
+            <SkillList title="Suggestions" skills={match.suggestions} />
           </div>
         ))}
+        {/* Pagination */}
+        <div className="flex gap-2 mt-6">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="bg-gray-300 px-4 py-2 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          <span className="px-4 py-2">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="bg-gray-300 px-4 py-2 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default JobMatchHistory
+export default JobMatchHistory;

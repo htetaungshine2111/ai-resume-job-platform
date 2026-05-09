@@ -1,14 +1,14 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
-import ProtectedRoute from './components/ProtectedRoute'
-import ResumeUpload from './pages/ResumeUpload'
-import History from './pages/History'
-import JobMatch from './pages/JobMatch'
-import JobMatchHistory from './pages/JobMatchHistory'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ResumeUpload from "./pages/ResumeUpload";
+import History from "./pages/History";
+import JobMatch from "./pages/JobMatch";
+import JobMatchHistory from "./pages/JobMatchHistory";
 
 function App() {
   return (
@@ -20,51 +20,50 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
-    path="/dashboard"
-    element={
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-  path="/upload-resume"
-  element={
-    <ProtectedRoute>
-      <ResumeUpload />
-    </ProtectedRoute>
-  }
-/>
-  <Route
-  path="/history"
-  element={
-    <ProtectedRoute>
-      <History />
-    </ProtectedRoute>
-  }
-/>
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/upload-resume"
+          element={
+            <ProtectedRoute>
+              <ResumeUpload />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <History />
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="/job-match"
-  element={
-    <ProtectedRoute>
-      <JobMatch />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/job-match"
+          element={
+            <ProtectedRoute>
+              <JobMatch />
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="/job-match-history"
-  element={
-    <ProtectedRoute>
-      <JobMatchHistory />
-    </ProtectedRoute>
-  }
-/>
-
+        <Route
+          path="/job-match-history"
+          element={
+            <ProtectedRoute>
+              <JobMatchHistory />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

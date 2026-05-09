@@ -1,34 +1,34 @@
-import { useState } from 'react'
-import { saveAuth } from '../utils/auth'
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+    e.preventDefault();
 
-  const res = await fetch('http://localhost:5000/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  })
+    const res = await fetch("http://localhost:5000/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-  const data = await res.json()
+    const data = await res.json();
 
-  if (!res.ok) {
-    alert(data.message)
-    return
-  }
+    if (!res.ok) {
+      alert(data.message);
+      return;
+    }
 
-  saveAuth(data.token, data.user)
+    //saveAuth(data.token, data.user);
 
-  window.location.href = '/dashboard'
-}
-
+    login(data.token, data.user);
+    window.location.href = "/dashboard";
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -61,7 +61,7 @@ function Login() {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

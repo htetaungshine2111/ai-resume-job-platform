@@ -1,33 +1,27 @@
-import { useState } from 'react'
+import { useState } from "react";
+import { api } from "../services/api";
+import { toast } from "react-hot-toast/headless";
 
 function JobMatch() {
-  const [resumeText, setResumeText] = useState('')
-  const [jobDescription, setJobDescription] = useState('')
-  const [result, setResult] = useState<any>(null)
+  const [resumeText, setResumeText] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [result, setResult] = useState<any>(null);
 
   const handleMatch = async () => {
     if (!resumeText || !jobDescription) {
-      alert('Please enter both resume text and job description')
-      return
+      alert("Please enter both resume text and job description");
+      return;
     }
 
-    const res = await fetch('http://localhost:5000/job-match', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ resumeText, jobDescription }),
-    })
+    try {
+      const data = await api.createJobMatch({ resumeText, jobDescription });
 
-    const data = await res.json()
-
-    if (!res.ok) {
-      alert(data.message)
-      return
+      setResult(data.result);
+      toast.success("Resume uploaded successfully");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
     }
-
-    setResult(data.result)
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -87,7 +81,7 @@ function JobMatch() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default JobMatch
+export default JobMatch;

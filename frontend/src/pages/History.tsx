@@ -1,22 +1,30 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
+import { getToken } from "../utils/auth";
+import { useAuth } from "../context/AuthContext";
 
 type Analysis = {
-  id: number
-  fileName: string
-  summary: string
-  skills: string[]
-  createdAt: string
-}
+  id: number;
+  fileName: string;
+  summary: string;
+  skills: string[];
+  createdAt: string;
+};
 
 function History() {
-  const [items, setItems] = useState<Analysis[]>([])
+  const [items, setItems] = useState<Analysis[]>([]);
+
+  const { token } = useAuth();
 
   useEffect(() => {
-    fetch('http://localhost:5000/resume-analyses')
+    fetch("http://localhost:5000/resume-analyses", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then(setItems)
-      .catch(console.error)
-  }, [])
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -43,7 +51,7 @@ function History() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export default History
+export default History;
