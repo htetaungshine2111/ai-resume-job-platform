@@ -1,27 +1,29 @@
-require('dotenv').config()
+require("dotenv").config();
 
-const express = require('express')
-const cors = require('cors')
+const express = require("express");
+const cors = require("cors");
 
-const authRoutes = require('./routes/authRoutes')
-const resumeRoutes = require('./routes/resumeRoutes')
-const jobMatchRoutes = require('./routes/jobMatchRoutes')
-const dashboardRoutes = require('./routes/dashboardRoutes')
+const authRoutes = require("./routes/authRoutes");
+const resumeRoutes = require("./routes/resumeRoutes");
+const jobMatchRoutes = require("./routes/jobMatchRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
-const app = express()
+const app = express();
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
-app.use('/', authRoutes)
-app.use('/', resumeRoutes)
-app.use('/', jobMatchRoutes)
-app.use('/', dashboardRoutes)
+app.use("/", authRoutes);
+app.use("/", resumeRoutes);
+app.use("/", jobMatchRoutes);
+app.use("/", dashboardRoutes);
 
-app.get('/', (req, res) => {
-  res.send('Backend is running')
-})
+app.get("/", (req, res) => {
+  res.send("Backend is running");
+});
 
-app.listen(5000, () => {
-  console.log('Server running on port 5000')
-})
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
