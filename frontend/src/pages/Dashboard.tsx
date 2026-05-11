@@ -9,6 +9,7 @@ import {
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../services/api";
 
 function Dashboard() {
   const { token, logout } = useAuth();
@@ -21,18 +22,19 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    //const token = getToken();
     if (!token) return;
 
-    fetch("http://localhost:5000/dashboard-stats", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setStats(data))
-      .catch((error) => console.error(error));
-  }, []);
+    api
+      .getDashboardStats()
+
+      .then((data) => {
+        setStats(data);
+      })
+
+      .catch((error) => {
+        console.error(error);
+      });
+  }, [token]);
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold mb-8">Dashboard</h1>

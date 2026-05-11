@@ -3,13 +3,15 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("token");
 
-  const headers = {
-    "Content-Type": "application/json",
-
+  const headers: Record<string, string> = {
     Authorization: token ? `Bearer ${token}` : "",
 
-    ...options.headers,
+    ...(options.headers as Record<string, string>),
   };
+
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
@@ -49,6 +51,38 @@ export const api = {
       method: "POST",
 
       body: JSON.stringify(data),
+    });
+  },
+
+  register(data: { name: string; email: string; password: string }) {
+    return apiFetch("/register", {
+      method: "POST",
+
+      body: JSON.stringify(data),
+    });
+  },
+
+  login(data: { email: string; password: string }) {
+    return apiFetch("/login", {
+      method: "POST",
+
+      body: JSON.stringify(data),
+    });
+  },
+
+  getDashboardStats() {
+    return apiFetch("/dashboard-stats");
+  },
+
+  getResumeAnalyses() {
+    return apiFetch("/resume-analyses");
+  },
+
+  uploadResume(formData: FormData) {
+    return apiFetch("/upload-resume", {
+      method: "POST",
+
+      body: formData,
     });
   },
 };

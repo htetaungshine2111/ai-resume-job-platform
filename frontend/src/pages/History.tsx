@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { getToken } from "../utils/auth";
 import { useAuth } from "../context/AuthContext";
-
+import { api } from "../services/api";
 type Analysis = {
   id: number;
   fileName: string;
@@ -16,15 +15,15 @@ function History() {
   const { token } = useAuth();
 
   useEffect(() => {
-    fetch("http://localhost:5000/resume-analyses", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
+    if (!token) return;
+
+    api
+      .getResumeAnalyses()
+
       .then(setItems)
+
       .catch(console.error);
-  }, []);
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">

@@ -1,37 +1,33 @@
-import { useState } from 'react'
+import { useState } from "react";
+import { api } from "../services/api";
+import toast from "react-hot-toast";
 
 function Register() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+    e.preventDefault();
 
-  try {
-    const res = await fetch('http://localhost:5000/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    })
+    try {
+      const data = await api.register({
+        name,
+        email,
+        password,
+      });
 
-    const data = await res.json()
+      toast.success(data.message || "Registration successful");
 
-    if (!res.ok) {
-      alert(data.message || 'Registration failed')
-      return
+      window.location.href = "/login";
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error instanceof Error ? error.message : "Registration failed",
+      );
     }
-
-    alert(data.message || 'Registration successful')
-
-    window.location.href = '/login'
-  } catch (error) {
-    console.error(error)
-    alert('Something went wrong. Please try again.')
-  }
-}
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -72,7 +68,7 @@ function Register() {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default Register
+export default Register;

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../services/api";
+import toast from "react-hot-toast";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -9,25 +11,22 @@ function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:5000/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const data = await api.login({
+        email,
+        password,
+      });
 
-    const data = await res.json();
+      login(data.token, data.user);
 
-    if (!res.ok) {
-      alert(data.message);
-      return;
+      toast.success("Login successful");
+
+      window.location.href = "/dashboard";
+    } catch (error) {
+      console.error(error);
+
+      toast.error(error instanceof Error ? error.message : "Login failed");
     }
-
-    //saveAuth(data.token, data.user);
-
-    login(data.token, data.user);
-    window.location.href = "/dashboard";
   };
 
   return (

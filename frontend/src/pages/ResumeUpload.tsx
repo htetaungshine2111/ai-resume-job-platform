@@ -41,32 +41,27 @@ function ResumeUpload() {
     e.preventDefault();
 
     if (!file) {
-      alert("Please select a resume file");
+      toast.error("Please select a resume file");
       return;
     }
 
     const formData = new FormData();
     formData.append("resume", file);
-    //const token = getToken();
 
-    const res = await fetch("http://localhost:5000/upload-resume", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+    try {
+      const data = await api.uploadResume(formData);
 
-    const data = await res.json();
+      setResumeText(data.resumeText);
+      setFileName(data.fileName);
 
-    if (!res.ok) {
-      alert(data.message);
-      return;
+      toast.success("Resume uploaded successfully");
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error instanceof Error ? error.message : "Resume upload failed",
+      );
     }
-
-    // 👇 THIS IS IMPORTANT
-    setResumeText(data.resumeText);
-    setFileName(data.fileName);
   };
 
   return (
