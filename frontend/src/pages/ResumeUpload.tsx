@@ -1,17 +1,23 @@
 import { useState } from "react";
 import { api } from "../services/api";
 import { toast } from "react-hot-toast/headless";
-import { useAuth } from "../context/AuthContext";
+
+type Analysis = {
+  summary: string;
+  skills: string[];
+  missingSkills: string[];
+  suggestions: string[];
+  jobRoles: string[];
+};
 
 function ResumeUpload() {
   const [file, setFile] = useState<File | null>(null);
 
   const [resumeText, setResumeText] = useState("");
 
-  const [analysis, setAnalysis] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState("");
-  const { token } = useAuth();
 
   const analyzeResume = async () => {
     if (!resumeText) {
