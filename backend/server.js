@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const resumeRoutes = require("./routes/resumeRoutes");
 const jobMatchRoutes = require("./routes/jobMatchRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/", authRoutes);
 app.use("/", resumeRoutes);
 app.use("/", jobMatchRoutes);
 app.use("/", dashboardRoutes);
+app.use("/", aiRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend is running");

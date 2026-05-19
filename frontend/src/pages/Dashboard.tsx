@@ -1,15 +1,8 @@
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
+import StatCard from "../components/StatCard";
+import ChartCard from "../components/ChartCard";
 
 function Dashboard() {
   const { token, logout } = useAuth();
@@ -17,8 +10,10 @@ function Dashboard() {
   const [stats, setStats] = useState({
     totalResumes: 0,
     totalMatches: 0,
+    totalCoverLetters: 0,
     averageMatchScore: 0,
     chartData: [],
+    matchScoreData: [],
   });
 
   useEffect(() => {
@@ -35,6 +30,7 @@ function Dashboard() {
         console.error(error);
       });
   }, [token]);
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
@@ -46,43 +42,22 @@ function Dashboard() {
       </button>
 
       {/* cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-gray-500">Total Resumes</h2>
-
-          <p className="text-3xl font-bold mt-2">{stats.totalResumes}</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-gray-500">Total Matches</h2>
-
-          <p className="text-3xl font-bold mt-2">{stats.totalMatches}</p>
-        </div>
-
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-gray-500">Average Match Score</h2>
-
-          <p className="text-3xl font-bold mt-2">{stats.averageMatchScore}%</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <StatCard title="Total Resumes" value={stats.totalResumes} />
+        <StatCard title="Total Matches" value={stats.totalMatches} />
+        <StatCard title="Total Cover Letters" value={stats.totalCoverLetters} />
+        <StatCard
+          title="Average Match Score"
+          value={`${stats.averageMatchScore}%`}
+        />
       </div>
 
       {/* chart */}
-      <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-xl font-bold mb-4">Skill Match Overview</h2>
 
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={stats.chartData}>
-              <XAxis dataKey="name" />
+      <ChartCard title="Platform Activity" data={stats.chartData} />
 
-              <YAxis />
-
-              <Tooltip />
-
-              <Bar dataKey="score" fill="#3b82f6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="mt-8">
+        <ChartCard title="Recent Match Scores" data={stats.matchScoreData} />
       </div>
     </div>
   );

@@ -35,11 +35,41 @@ router.get("/dashboard-stats", authMiddleware, async (req, res) => {
       },
     ];
 
+    const totalCoverLetters = await prisma.resumeAnalysis.count({
+      where: {
+        userId: req.user.userId,
+        coverLetter: {
+          not: null,
+        },
+      },
+    });
+
+    const recentMatches = await prisma.jobMatch.findMany({
+      where: {
+        userId: req.user.userId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+      select: {
+        matchScore: true,
+        createdAt: true,
+      },
+    });
+
+    const matchScoreData = recentMatches.reverse().map((match, index) => ({
+      name: `Match ${index + 1}`,
+      score: match.matchScore,
+    }));
+
     res.json({
       totalResumes,
       totalMatches,
+      totalCoverLetters,
       averageMatchScore,
       chartData,
+      matchScoreData,
     });
   } catch (error) {
     console.error(error);

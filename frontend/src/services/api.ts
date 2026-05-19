@@ -85,4 +85,33 @@ export const api = {
       body: formData,
     });
   },
+
+  aiResumeFeedback(data: { resumeText: string }) {
+    return apiFetch("/ai-resume-feedback", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  generateCoverLetter(data: { resumeText: string; jobDescription: string }) {
+    return apiFetch("/ai-cover-letter", {
+      method: "POST",
+
+      body: JSON.stringify(data),
+    });
+  },
+
+  getCoverLetters() {
+    return apiFetch("/cover-letters");
+  },
+
+  generateInterviewQuestions(data: {
+    resumeText: string;
+    jobDescription: string;
+  }) {
+    return apiFetch("/ai-interview-questions", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
 };

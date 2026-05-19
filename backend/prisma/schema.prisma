@@ -26,6 +26,9 @@ model ResumeAnalysis {
   missingSkills String[]
   suggestions   String[]
   jobRoles      String[]
+  aiFeedback    String?
+  jobDescription String?
+  coverLetter    String?
   createdAt     DateTime @default(now())
 
   userId        Int

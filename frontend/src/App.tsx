@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -9,58 +8,39 @@ import ResumeUpload from "./pages/ResumeUpload";
 import History from "./pages/History";
 import JobMatch from "./pages/JobMatch";
 import JobMatchHistory from "./pages/JobMatchHistory";
+import CoverLetterHistory from "./pages/CoverLetterHistory";
+import Layout from "./components/Layout";
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/upload-resume"
-          element={
-            <ProtectedRoute>
-              <ResumeUpload />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/history"
-          element={
-            <ProtectedRoute>
-              <History />
-            </ProtectedRoute>
-          }
-        />
 
         <Route
-          path="/job-match"
           element={
             <ProtectedRoute>
-              <JobMatch />
+              <Layout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route
-          path="/job-match-history"
-          element={
-            <ProtectedRoute>
-              <JobMatchHistory />
-            </ProtectedRoute>
-          }
-        />
+          <Route path="/upload-resume" element={<ResumeUpload />} />
+
+          <Route path="/history" element={<History />} />
+
+          <Route path="/job-match" element={<JobMatch />} />
+
+          <Route path="/job-match-history" element={<JobMatchHistory />} />
+
+          <Route
+            path="/cover-letter-history"
+            element={<CoverLetterHistory />}
+          />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

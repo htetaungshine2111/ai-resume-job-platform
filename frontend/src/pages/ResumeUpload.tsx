@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { api } from "../services/api";
 import { toast } from "react-hot-toast/headless";
+import AiFeedbackSection from "../components/AiFeedbackSection";
+import CoverLetterSection from "../components/CoverLetterSection";
+import InterviewQuestionsSection from "../components/InterviewQuestionsSection";
 
 type Analysis = {
   summary: string;
@@ -10,6 +13,13 @@ type Analysis = {
   jobRoles: string[];
 };
 
+type AiFeedback = {
+  strengths: string[];
+  weaknesses: string[];
+  missingSkills: string[];
+  atsImprovements: string[];
+  careerSuggestions: string[];
+};
 function ResumeUpload() {
   const [file, setFile] = useState<File | null>(null);
 
@@ -18,6 +28,56 @@ function ResumeUpload() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState("");
+  const [aiFeedback, setAiFeedback] = useState<AiFeedback | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const [jobDescription, setJobDescription] = useState("");
+
+  const [coverLetter, setCoverLetter] = useState("");
+
+  const [coverLetterLoading, setCoverLetterLoading] = useState(false);
+
+  const [interviewQuestions, setInterviewQuestions] = useState("");
+  const [interviewLoading, setInterviewLoading] = useState(false);
+
+  const copyCoverLetter = async () => {
+    if (!coverLetter) {
+      toast.error("No cover letter to copy");
+      return;
+    }
+
+    await navigator.clipboard.writeText(coverLetter);
+
+    toast.success("Cover letter copied");
+  };
+
+  const copyAiFeedback = async () => {
+    if (!aiFeedback) {
+      toast.error("No AI feedback to copy");
+      return;
+    }
+
+    const formattedText = `
+Strengths:
+${aiFeedback.strengths.map((item) => `- ${item}`).join("\n")}
+
+Weaknesses:
+${aiFeedback.weaknesses.map((item) => `- ${item}`).join("\n")}
+
+Missing Skills:
+${aiFeedback.missingSkills.map((item) => `- ${item}`).join("\n")}
+
+ATS Improvements:
+${aiFeedback.atsImprovements.map((item) => `- ${item}`).join("\n")}
+
+Career Suggestions:
+${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
+`;
+
+    await navigator.clipboard.writeText(formattedText);
+
+    toast.success("AI feedback copied");
+  };
 
   const analyzeResume = async () => {
     if (!resumeText) {
@@ -60,13 +120,118 @@ function ResumeUpload() {
       setResumeText(data.resumeText);
       setFileName(data.fileName);
 
+      setAiLoading(true);
+
+      const aiData = await api.aiResumeFeedback({
+        resumeText: data.resumeText,
+      });
+
+      setAiFeedback(aiData.feedback);
+
+      setAiLoading(false);
+
+      console.log(aiData.feedback);
+
       toast.success("Resume uploaded successfully");
     } catch (error) {
+      setAiLoading(false);
       console.error(error);
 
       toast.error(
         error instanceof Error ? error.message : "Resume upload failed",
       );
+    }
+  };
+
+  const generateCoverLetter = async () => {
+    if (!resumeText) {
+      toast.error("Upload resume first");
+      return;
+    }
+
+    if (!jobDescription) {
+      toast.error("Please enter job description");
+      return;
+    }
+
+    try {
+      setCoverLetterLoading(true);
+
+      const data = await api.generateCoverLetter({
+        resumeText,
+        jobDescription,
+      });
+
+      setCoverLetter(data.coverLetter);
+
+      toast.success("Cover letter generated");
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Cover letter generation failed",
+      );
+    } finally {
+      setCoverLetterLoading(false);
+    }
+  };
+
+  const downloadCoverLetter = () => {
+    if (!coverLetter) {
+      toast.error("No cover letter available");
+      return;
+    }
+
+    const blob = new Blob([coverLetter], { type: "text/plain" });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.download = "cover-letter.txt";
+    toast.success("Cover letter downloaded");
+
+    link.click();
+
+    window.URL.revokeObjectURL(url);
+  };
+
+  const generateInterviewQuestions = async () => {
+    if (!resumeText) {
+      toast.error("Upload resume first");
+      return;
+    }
+
+    if (!jobDescription) {
+      toast.error("Please enter job description");
+      return;
+    }
+
+    try {
+      setInterviewLoading(true);
+
+      const data = await api.generateInterviewQuestions({
+        resumeText,
+        jobDescription,
+      });
+
+      setInterviewQuestions(data.questions);
+
+      toast.success("Interview questions generated");
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Interview question generation failed",
+      );
+    } finally {
+      setInterviewLoading(false);
     }
   };
 
@@ -90,6 +255,34 @@ function ResumeUpload() {
             Upload Resume
           </button>
         </form>
+        {aiLoading && (
+          <div className="mt-6 bg-white p-6 rounded-xl shadow">
+            <p className="text-blue-600 font-bold">
+              Analyzing resume with AI...
+            </p>
+          </div>
+        )}
+
+        <CoverLetterSection
+          jobDescription={jobDescription}
+          coverLetter={coverLetter}
+          coverLetterLoading={coverLetterLoading}
+          onJobDescriptionChange={setJobDescription}
+          onGenerate={generateCoverLetter}
+          onCopy={copyCoverLetter}
+          onDownload={downloadCoverLetter}
+        />
+
+        <InterviewQuestionsSection
+          interviewQuestions={interviewQuestions}
+          interviewLoading={interviewLoading}
+          onGenerate={generateInterviewQuestions}
+        />
+
+        {aiFeedback && (
+          <AiFeedbackSection aiFeedback={aiFeedback} onCopy={copyAiFeedback} />
+        )}
+
         {resumeText && (
           <div className="mt-6">
             <h2 className="text-lg font-bold mb-2">Extracted Resume Text</h2>

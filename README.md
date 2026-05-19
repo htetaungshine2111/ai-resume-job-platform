@@ -31,3 +31,37 @@ node server.js
 Frontend:
 npm install
 npm run dev
+
+## Live Demo
+
+Frontend:
+https://ai-resume-job-platform-five.vercel.app
+
+Backend API:
+https://ai-resume-job-platform-o0ky.onrender.com
+
+## Tech Stack
+
+Frontend:
+
+- React
+- TypeScript
+- Tailwind CSS
+- React Router
+- React Hot Toast
+
+Backend:
+
+- Node.js
+- Express
+- Prisma ORM
+- JWT Authentication
+
+Database:
+
+- PostgreSQL (Supabase)
+
+Deployment:
+
+- Vercel
+- Render

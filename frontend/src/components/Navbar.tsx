@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 function Navbar() {
   return (
-    <nav className="bg-white shadow-sm px-8 py-4 flex justify-between items-center">
+    <nav className="bg-white dark:bg-gray-800 shadow-sm px-8 py-4 flex justify-between items-center">
       <Link to="/" className="text-xl font-bold text-gray-900">
         AI Job Match
       </Link>
@@ -21,21 +21,22 @@ function Navbar() {
           Dashboard
         </Link>
         <Link to="/upload-resume" className="text-gray-600 hover:text-gray-900">
-  Upload Resume
-</Link>
-<Link to="/job-match" className="text-gray-600 hover:text-gray-900">
-  Job Match
-</Link>
-<Link
-  to="/job-match-history"
-  className="text-gray-600 hover:text-gray-900"
->
-  Match History
-</Link>
+          Upload Resume
+        </Link>
+        <Link to="/job-match" className="text-gray-600 hover:text-gray-900">
+          Job Match
+        </Link>
+        <Link
+          to="/job-match-history"
+          className="text-gray-600 hover:text-gray-900"
+        >
+          Match History
+        </Link>
         <Link to="/history">History</Link>
+        <Link to="/cover-letter-history">Cover Letter History</Link>
       </div>
     </nav>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;
