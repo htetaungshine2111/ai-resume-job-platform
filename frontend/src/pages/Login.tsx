@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
-import toast from "react-hot-toast";
+import { notify } from "../utils/notify";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -19,13 +19,13 @@ function Login() {
 
       login(data.token, data.user);
 
-      toast.success("Login successful");
+      notify.success("Login successful");
 
       window.location.href = "/dashboard";
     } catch (error) {
       console.error(error);
 
-      toast.error(error instanceof Error ? error.message : "Login failed");
+      notify.error(error instanceof Error ? error.message : "Login failed");
     }
   };
 

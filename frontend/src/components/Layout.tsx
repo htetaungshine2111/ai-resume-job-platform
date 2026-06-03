@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { MessageSquareText } from "lucide-react";
 
 import {
   LayoutDashboard,
@@ -46,14 +47,14 @@ function Layout() {
 
       {sidebarOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-40 z-30"
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
         className={`
-          fixed md:static top-0 left-0 min-h-screen w-64
+          fixed top-0 left-0 min-h-screen w-64
           bg-gray-900 text-white p-6
           transform transition-transform duration-300 z-40
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
@@ -118,6 +119,15 @@ function Layout() {
             <ClipboardList size={20} />
             Match History
           </NavLink>
+
+          <NavLink
+            to="/interview-history"
+            className={linkClass}
+            onClick={() => setSidebarOpen(false)}
+          >
+            <MessageSquareText size={20} />
+            Interview History
+          </NavLink>
         </nav>
 
         <div className="mt-10 border-t border-gray-700 pt-4">
@@ -141,7 +151,7 @@ function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 p-6 pt-20 md:pt-6">
+      <main className="flex-1 p-6 pt-20 md:pt-6 md:ml-64">
         <Outlet />
       </main>
     </div>

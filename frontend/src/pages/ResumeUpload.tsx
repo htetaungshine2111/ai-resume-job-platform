@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { toast } from "react-hot-toast/headless";
 import AiFeedbackSection from "../components/AiFeedbackSection";
 import CoverLetterSection from "../components/CoverLetterSection";
 import InterviewQuestionsSection from "../components/InterviewQuestionsSection";
+import { notify } from "../utils/notify";
+import InterviewAnswerEvaluation from "../components/InterviewAnswerEvaluation";
 
 type Analysis = {
   summary: string;
@@ -14,6 +15,7 @@ type Analysis = {
 };
 
 type AiFeedback = {
+  resumeScore: number;
   strengths: string[];
   weaknesses: string[];
   missingSkills: string[];
@@ -40,20 +42,25 @@ function ResumeUpload() {
   const [interviewQuestions, setInterviewQuestions] = useState("");
   const [interviewLoading, setInterviewLoading] = useState(false);
 
+  const [selectedQuestion, setSelectedQuestion] = useState("");
+  const [interviewAnswer, setInterviewAnswer] = useState("");
+  const [answerFeedback, setAnswerFeedback] = useState("");
+  const [answerLoading, setAnswerLoading] = useState(false);
+
   const copyCoverLetter = async () => {
     if (!coverLetter) {
-      toast.error("No cover letter to copy");
+      notify.error("No cover letter to copy");
       return;
     }
 
     await navigator.clipboard.writeText(coverLetter);
 
-    toast.success("Cover letter copied");
+    notify.success("Cover letter copied");
   };
 
   const copyAiFeedback = async () => {
     if (!aiFeedback) {
-      toast.error("No AI feedback to copy");
+      notify.error("No AI feedback to copy");
       return;
     }
 
@@ -76,7 +83,40 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
 
     await navigator.clipboard.writeText(formattedText);
 
-    toast.success("AI feedback copied");
+    notify.success("AI feedback copied");
+  };
+
+  const evaluateAnswer = async () => {
+    if (!selectedQuestion) {
+      notify.error("Please enter or select a question");
+      return;
+    }
+
+    if (!interviewAnswer) {
+      notify.error("Please enter your answer");
+      return;
+    }
+
+    try {
+      setAnswerLoading(true);
+
+      const data = await api.evaluateInterviewAnswer({
+        question: selectedQuestion,
+        answer: interviewAnswer,
+      });
+
+      setAnswerFeedback(data.feedback);
+
+      notify.success("Answer evaluated");
+    } catch (error) {
+      console.error(error);
+
+      notify.error(
+        error instanceof Error ? error.message : "Answer evaluation failed",
+      );
+    } finally {
+      setAnswerLoading(false);
+    }
   };
 
   const analyzeResume = async () => {
@@ -95,9 +135,9 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
 
       setAnalysis(data.analysis);
 
-      toast.success("Resume analyzed successfully");
+      notify.success("Resume analyzed successfully");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Analyze failed");
+      notify.error(error instanceof Error ? error.message : "Analyze failed");
     } finally {
       setLoading(false);
     }
@@ -107,7 +147,7 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
     e.preventDefault();
 
     if (!file) {
-      toast.error("Please select a resume file");
+      notify.error("Please select a resume file");
       return;
     }
 
@@ -132,12 +172,12 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
 
       console.log(aiData.feedback);
 
-      toast.success("Resume uploaded successfully");
+      notify.success("Resume uploaded successfully");
     } catch (error) {
       setAiLoading(false);
       console.error(error);
 
-      toast.error(
+      notify.error(
         error instanceof Error ? error.message : "Resume upload failed",
       );
     }
@@ -145,12 +185,12 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
 
   const generateCoverLetter = async () => {
     if (!resumeText) {
-      toast.error("Upload resume first");
+      notify.error("Upload resume first");
       return;
     }
 
     if (!jobDescription) {
-      toast.error("Please enter job description");
+      notify.error("Please enter job description");
       return;
     }
 
@@ -164,11 +204,11 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
 
       setCoverLetter(data.coverLetter);
 
-      toast.success("Cover letter generated");
+      notify.success("Cover letter generated");
     } catch (error) {
       console.error(error);
 
-      toast.error(
+      notify.error(
         error instanceof Error
           ? error.message
           : "Cover letter generation failed",
@@ -180,7 +220,7 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
 
   const downloadCoverLetter = () => {
     if (!coverLetter) {
-      toast.error("No cover letter available");
+      notify.error("No cover letter available");
       return;
     }
 
@@ -193,7 +233,7 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
     link.href = url;
 
     link.download = "cover-letter.txt";
-    toast.success("Cover letter downloaded");
+    notify.success("Cover letter downloaded");
 
     link.click();
 
@@ -202,12 +242,12 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
 
   const generateInterviewQuestions = async () => {
     if (!resumeText) {
-      toast.error("Upload resume first");
+      notify.error("Upload resume first");
       return;
     }
 
     if (!jobDescription) {
-      toast.error("Please enter job description");
+      notify.error("Please enter job description");
       return;
     }
 
@@ -221,11 +261,11 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
 
       setInterviewQuestions(data.questions);
 
-      toast.success("Interview questions generated");
+      notify.success("Interview questions generated");
     } catch (error) {
       console.error(error);
 
-      toast.error(
+      notify.error(
         error instanceof Error
           ? error.message
           : "Interview question generation failed",
@@ -277,6 +317,16 @@ ${aiFeedback.careerSuggestions.map((item) => `- ${item}`).join("\n")}
           interviewQuestions={interviewQuestions}
           interviewLoading={interviewLoading}
           onGenerate={generateInterviewQuestions}
+        />
+
+        <InterviewAnswerEvaluation
+          selectedQuestion={selectedQuestion}
+          interviewAnswer={interviewAnswer}
+          answerFeedback={answerFeedback}
+          answerLoading={answerLoading}
+          onQuestionChange={setSelectedQuestion}
+          onAnswerChange={setInterviewAnswer}
+          onEvaluate={evaluateAnswer}
         />
 
         {aiFeedback && (

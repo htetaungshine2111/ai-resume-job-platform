@@ -44,6 +44,31 @@ router.get("/dashboard-stats", authMiddleware, async (req, res) => {
       },
     });
 
+    const recentResumeScores = await prisma.resumeAnalysis.findMany({
+      where: {
+        userId: req.user.userId,
+        resumeScore: {
+          not: null,
+        },
+      },
+
+      orderBy: {
+        createdAt: "asc",
+      },
+
+      take: 7,
+
+      select: {
+        resumeScore: true,
+        createdAt: true,
+      },
+    });
+
+    const resumeScoreData = recentResumeScores.map((item, index) => ({
+      name: `Resume ${index + 1}`,
+      score: item.resumeScore,
+    }));
+
     const recentMatches = await prisma.jobMatch.findMany({
       where: {
         userId: req.user.userId,
@@ -63,6 +88,45 @@ router.get("/dashboard-stats", authMiddleware, async (req, res) => {
       score: match.matchScore,
     }));
 
+    const analyses = await prisma.resumeAnalysis.findMany({
+      where: {
+        userId: req.user.userId,
+      },
+
+      select: {
+        skills: true,
+        missingSkills: true,
+        resumeScore: true,
+      },
+    });
+
+    const bestResumeScore = Math.max(
+      ...analyses.map((item) => item.resumeScore || 0),
+      0,
+    );
+
+    const allMissingSkills = analyses.flatMap(
+      (item) => item.missingSkills || [],
+    );
+
+    const skillCounts = {};
+
+    allMissingSkills.forEach((skill) => {
+      skillCounts[skill] = (skillCounts[skill] || 0) + 1;
+    });
+
+    const mostCommonMissingSkill = Object.keys(skillCounts).reduce(
+      (a, b) => (skillCounts[a] > skillCounts[b] ? a : b),
+      "",
+    );
+
+    const insightSummary = `
+Your resume performance is improving.
+Focus more on ${mostCommonMissingSkill || "technical skills"}
+to improve your match scores further.
+Your best resume score is ${bestResumeScore}%.
+`;
+
     res.json({
       totalResumes,
       totalMatches,
@@ -70,6 +134,10 @@ router.get("/dashboard-stats", authMiddleware, async (req, res) => {
       averageMatchScore,
       chartData,
       matchScoreData,
+      resumeScoreData,
+      bestResumeScore,
+      mostCommonMissingSkill,
+      insightSummary,
     });
   } catch (error) {
     console.error(error);

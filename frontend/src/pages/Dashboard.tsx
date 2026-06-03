@@ -3,9 +3,11 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import StatCard from "../components/StatCard";
 import ChartCard from "../components/ChartCard";
+import InsightCard from "../components/InsightCard";
+import { Link } from "react-router-dom";
 
 function Dashboard() {
-  const { token, logout } = useAuth();
+  const { token } = useAuth();
 
   const [stats, setStats] = useState({
     totalResumes: 0,
@@ -14,6 +16,10 @@ function Dashboard() {
     averageMatchScore: 0,
     chartData: [],
     matchScoreData: [],
+    resumeScoreData: [],
+    bestResumeScore: 0,
+    mostCommonMissingSkill: "",
+    insightSummary: "",
   });
 
   useEffect(() => {
@@ -32,33 +38,125 @@ function Dashboard() {
   }, [token]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-      <button
-        onClick={logout}
-        className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-      >
-        Logout
-      </button>
+    <div className="p-6 space-y-10">
+      <h1 className="text-3xl font-bold dark:text-white">Dashboard</h1>
 
-      {/* cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Resumes" value={stats.totalResumes} />
-        <StatCard title="Total Matches" value={stats.totalMatches} />
-        <StatCard title="Total Cover Letters" value={stats.totalCoverLetters} />
-        <StatCard
-          title="Average Match Score"
-          value={`${stats.averageMatchScore}%`}
+      {stats.totalResumes === 0 && (
+        <div
+          className="
+    bg-white dark:bg-gray-800
+    rounded-xl shadow p-8 text-center
+  "
+        >
+          <h2
+            className="
+      text-2xl font-bold mb-4
+      dark:text-white
+    "
+          >
+            Welcome to AI Career Platform
+          </h2>
+
+          <p
+            className="
+      text-gray-600 dark:text-gray-300
+      mb-6
+    "
+          >
+            Upload your first resume to receive AI-powered feedback, match
+            scores, and career insights.
+          </p>
+
+          <Link
+            to="/upload-resume"
+            className="
+        inline-block
+        bg-indigo-600
+        text-white
+        px-6 py-3
+        rounded-lg
+        hover:bg-indigo-700
+        transition-all duration-300
+      "
+          >
+            Upload Resume
+          </Link>
+        </div>
+      )}
+
+      {/* Overview Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-6 dark:text-white">Overview</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <StatCard
+            title="Total Resumes"
+            value={stats.totalResumes}
+            delay={0}
+          />
+          <StatCard
+            title="Total Matches"
+            value={stats.totalMatches}
+            delay={0.1}
+          />
+          <StatCard
+            title="Cover Letters"
+            value={stats.totalCoverLetters}
+            delay={0.2}
+          />
+          <StatCard
+            title="Average Match Score"
+            value={`${stats.averageMatchScore}%`}
+            delay={0.3}
+          />
+        </div>
+      </section>
+
+      {/* AI Insights Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-6 dark:text-white">AI Insights</h2>
+        <InsightCard
+          title="AI Career Insights"
+          message={stats.insightSummary}
         />
-      </div>
 
-      {/* chart */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <StatCard
+            title="Best Resume Score"
+            value={stats.bestResumeScore}
+            delay={0.5}
+          />
 
-      <ChartCard title="Platform Activity" data={stats.chartData} />
+          <StatCard
+            title="Most Common Missing Skill"
+            value={stats.mostCommonMissingSkill || "N/A"}
+            delay={0.6}
+          />
+        </div>
+      </section>
 
-      <div className="mt-8">
-        <ChartCard title="Recent Match Scores" data={stats.matchScoreData} />
-      </div>
+      {/* Analytics Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-6 dark:text-white">Analytics</h2>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <ChartCard
+            title="Platform Activity"
+            data={stats.chartData}
+            delay={0.7}
+          />
+          <ChartCard
+            title="Recent Match Scores"
+            data={stats.matchScoreData}
+            delay={0.8}
+          />
+          <ChartCard
+            title="Resume Score Trend"
+            data={stats.resumeScoreData}
+            delay={0.9}
+          />
+        </div>
+      </section>
     </div>
   );
 }

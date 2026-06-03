@@ -29,10 +29,15 @@ model ResumeAnalysis {
   aiFeedback    String?
   jobDescription String?
   coverLetter    String?
+  resumeScore Int?
   createdAt     DateTime @default(now())
 
   userId        Int
   user          User     @relation(fields: [userId], references: [id])
+
+  title String?
+  interviewQuestions String?
+  interviewTitle     String?
 }
 
 

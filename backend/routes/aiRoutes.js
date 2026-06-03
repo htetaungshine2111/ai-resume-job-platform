@@ -31,12 +31,15 @@ Do not include explanation outside JSON.
 
 Use this format:
 {
+  "resumeScore": 0,
   "strengths": [],
   "weaknesses": [],
   "missingSkills": [],
   "atsImprovements": [],
   "careerSuggestions": []
 }
+
+resumeScore should be a number from 0 to 100.
 
 Resume:
 ${resumeText}
@@ -65,7 +68,7 @@ ${resumeText}
         jobRoles: feedback.careerSuggestions || [],
 
         aiFeedback: JSON.stringify(feedback),
-
+        resumeScore: feedback.resumeScore,
         userId: req.user.userId,
       },
     });
@@ -77,7 +80,7 @@ ${resumeText}
   } catch (error) {
     console.error("AI FEEDBACK ERROR:", error);
 
-    if (error.status === 429) {
+    if (error.status === 503 || error.status === 429) {
       return res.json({
         message: "AI quota exceeded, showing fallback feedback",
         feedback: `
@@ -159,6 +162,7 @@ ${jobDescription}
 
     await prisma.resumeAnalysis.create({
       data: {
+        title: "AI Cover Letter",
         fileName: "AI Cover Letter",
         resumeText,
         jobDescription,
@@ -180,6 +184,32 @@ ${jobDescription}
       coverLetter,
     });
   } catch (error) {
+    if (error.status === 503 || error.status === 429) {
+      return res.json({
+        message: "AI is busy, showing fallback questions",
+        questions: `
+Technical Questions:
+1. Can you explain your experience with backend API development?
+2. How would you design a user authentication system with JWT?
+3. How do you handle database relationships using Prisma?
+4. What is the difference between frontend state and backend persistence?
+5. How would you deploy a full-stack app using Vercel, Render, and Supabase?
+
+Behavioral Questions:
+1. Tell me about a difficult bug you solved.
+2. Describe a time you learned a new technology quickly.
+3. How do you handle feedback from teammates?
+4. Tell me about a project you are proud of.
+5. How do you manage tasks when deadlines are tight?
+
+Project Discussion Questions:
+1. How did you build your AI Resume & Career Platform?
+2. Why did you choose React, Node.js, Prisma, and PostgreSQL?
+3. How did you integrate Gemini AI into your application?
+    `,
+      });
+    }
+
     console.error("COVER LETTER ERROR:", error);
 
     res.status(500).json({
@@ -199,6 +229,7 @@ router.get("/cover-letters", authMiddleware, async (req, res) => {
       },
       select: {
         id: true,
+        title: true,
         jobDescription: true,
         coverLetter: true,
         createdAt: true,
@@ -250,6 +281,25 @@ ${jobDescription}
     const result = await model.generateContent(prompt);
     const questions = result.response.text();
 
+    await prisma.resumeAnalysis.create({
+      data: {
+        title: "AI Interview Questions",
+        fileName: "AI Interview Questions",
+        resumeText,
+        jobDescription,
+        interviewTitle: "AI Interview Questions",
+        interviewQuestions: questions,
+
+        summary: "AI-generated interview questions",
+        skills: [],
+        missingSkills: [],
+        suggestions: [],
+        jobRoles: [],
+
+        userId: req.user.userId,
+      },
+    });
+
     res.json({
       message: "Interview questions generated successfully",
       questions,
@@ -259,6 +309,181 @@ ${jobDescription}
 
     res.status(500).json({
       message: "Interview questions generation failed",
+    });
+  }
+});
+
+router.delete("/cover-letters/:id", authMiddleware, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const existingCoverLetter = await prisma.resumeAnalysis.findFirst({
+      where: {
+        id,
+        userId: req.user.userId,
+      },
+    });
+
+    if (!existingCoverLetter) {
+      return res.status(404).json({
+        message: "Cover letter not found",
+      });
+    }
+
+    await prisma.resumeAnalysis.delete({
+      where: {
+        id,
+      },
+    });
+
+    res.json({
+      message: "Cover letter deleted successfully",
+    });
+  } catch (error) {
+    if (error.status === 503 || error.status === 429) {
+      return res.json({
+        message: "AI is busy, showing fallback questions",
+        questions: `
+Technical Questions:
+1. Can you explain your experience with backend API development?
+2. How would you design a user authentication system with JWT?
+3. How do you handle database relationships using Prisma?
+4. What is the difference between frontend state and backend persistence?
+5. How would you deploy a full-stack app using Vercel, Render, and Supabase?
+
+Behavioral Questions:
+1. Tell me about a difficult bug you solved.
+2. Describe a time you learned a new technology quickly.
+3. How do you handle feedback from teammates?
+4. Tell me about a project you are proud of.
+5. How do you manage tasks when deadlines are tight?
+
+Project Discussion Questions:
+1. How did you build your AI Resume & Career Platform?
+2. Why did you choose React, Node.js, Prisma, and PostgreSQL?
+3. How did you integrate Gemini AI into your application?
+    `,
+      });
+    }
+
+    console.error("DELETE COVER LETTER ERROR:", error);
+
+    res.status(500).json({
+      message: "Failed to delete cover letter",
+    });
+  }
+});
+
+router.patch("/cover-letters/:id", authMiddleware, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { title } = req.body;
+
+    const existingCoverLetter = await prisma.resumeAnalysis.findFirst({
+      where: {
+        id,
+        userId: req.user.userId,
+      },
+    });
+
+    if (!existingCoverLetter) {
+      return res.status(404).json({
+        message: "Cover letter not found",
+      });
+    }
+
+    const updatedCoverLetter = await prisma.resumeAnalysis.update({
+      where: {
+        id,
+      },
+      data: {
+        title,
+      },
+    });
+
+    res.json(updatedCoverLetter);
+  } catch (error) {
+    console.error("UPDATE COVER LETTER ERROR:", error);
+
+    res.status(500).json({
+      message: "Failed to update cover letter",
+    });
+  }
+});
+
+router.post("/ai-evaluate-answer", authMiddleware, async (req, res) => {
+  try {
+    const { question, answer } = req.body;
+
+    if (!question || !answer) {
+      return res.status(400).json({
+        message: "Question and answer are required",
+      });
+    }
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-lite",
+    });
+
+    const prompt = `
+Evaluate this interview answer.
+
+Return:
+- score from 0 to 100
+- strengths
+- weaknesses
+- improved answer
+
+Question:
+${question}
+
+Answer:
+${answer}
+`;
+
+    const result = await model.generateContent(prompt);
+    const feedback = result.response.text();
+
+    res.json({
+      message: "Answer evaluated successfully",
+      feedback,
+    });
+  } catch (error) {
+    console.error("ANSWER EVALUATION ERROR:", error);
+
+    res.status(500).json({
+      message: "Answer evaluation failed",
+    });
+  }
+});
+
+router.get("/interview-questions", authMiddleware, async (req, res) => {
+  try {
+    const interviews = await prisma.resumeAnalysis.findMany({
+      where: {
+        userId: req.user.userId,
+        interviewQuestions: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        interviewTitle: true,
+        jobDescription: true,
+        interviewQuestions: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json(interviews);
+  } catch (error) {
+    console.error("GET INTERVIEW QUESTIONS ERROR:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch interview questions",
     });
   }
 });

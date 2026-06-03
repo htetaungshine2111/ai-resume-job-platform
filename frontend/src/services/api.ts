@@ -41,7 +41,6 @@ export const api = {
   analyzeResume(data: { resumeText: string; fileName: string }) {
     return apiFetch("/analyze-resume", {
       method: "POST",
-
       body: JSON.stringify(data),
     });
   },
@@ -113,5 +112,32 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     });
+  },
+
+  deleteCoverLetter(id: number) {
+    return apiFetch(`/cover-letters/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  updateCoverLetterTitle(id: number, title: string) {
+    return apiFetch(`/cover-letters/${id}`, {
+      method: "PATCH",
+
+      body: JSON.stringify({
+        title,
+      }),
+    });
+  },
+
+  evaluateInterviewAnswer(data: { question: string; answer: string }) {
+    return apiFetch("/ai-evaluate-answer", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  getInterviewQuestions() {
+    return apiFetch("/interview-questions");
   },
 };

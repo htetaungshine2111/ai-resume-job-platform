@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import toast from "react-hot-toast";
+import { notify } from "../utils/notify";
 
 function Register() {
   const [name, setName] = useState("");
@@ -17,13 +17,13 @@ function Register() {
         password,
       });
 
-      toast.success(data.message || "Registration successful");
+      notify.success(data.message || "Registration successful");
 
       window.location.href = "/login";
     } catch (error) {
       console.error(error);
 
-      toast.error(
+      notify.error(
         error instanceof Error ? error.message : "Registration failed",
       );
     }

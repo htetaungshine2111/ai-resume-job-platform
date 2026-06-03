@@ -1,4 +1,7 @@
+import ResumeScoreCard from "./ResumeScoreCard";
+import { motion } from "framer-motion";
 type AiFeedback = {
+  resumeScore: number;
   strengths: string[];
   weaknesses: string[];
   missingSkills: string[];
@@ -12,9 +15,35 @@ type Props = {
 };
 
 function AiFeedbackSection({ aiFeedback, onCopy }: Props) {
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "bg-green-600";
+    if (score >= 60) return "bg-yellow-500";
+    return "bg-red-600";
+  };
+
   return (
     <div className="mt-6 bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
       <h2 className="text-2xl font-bold mb-6">AI Resume Feedback</h2>
+      <ResumeScoreCard score={aiFeedback.resumeScore} />
+      <div className="mb-6">
+        <div className="flex justify-between mb-2">
+          <span className="font-bold">Resume Score</span>
+          <span className="font-bold">{aiFeedback.resumeScore}%</span>
+        </div>
+
+        <div className="w-full bg-gray-200 rounded-full h-4">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{
+              width: `${aiFeedback.resumeScore}%`,
+            }}
+            transition={{
+              duration: 0.8,
+            }}
+            className={`${getScoreColor(aiFeedback.resumeScore)} h-4 rounded-full`}
+          />
+        </div>
+      </div>
 
       <Section title="Strengths" items={aiFeedback.strengths} />
       <Section title="Weaknesses" items={aiFeedback.weaknesses} />

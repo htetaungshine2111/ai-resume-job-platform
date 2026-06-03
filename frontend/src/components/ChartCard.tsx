@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 import {
   BarChart,
   Bar,
@@ -15,11 +17,23 @@ type ChartItem = {
 type Props = {
   title: string;
   data: ChartItem[];
+  delay?: number;
 };
 
 function ChartCard({ title, data }: Props) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+    <motion.div
+      initial={{ y: 20 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="
+  bg-white dark:bg-gray-800
+  rounded-xl shadow p-6
+  transition-all duration-300
+  hover:shadow-2xl
+  hover:-translate-y-1
+"
+    >
       <h2 className="text-xl font-bold dark:text-white mb-4">{title}</h2>
 
       <div className="h-80">
@@ -32,7 +46,7 @@ function ChartCard({ title, data }: Props) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

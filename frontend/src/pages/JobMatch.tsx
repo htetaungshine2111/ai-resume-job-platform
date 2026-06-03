@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../services/api";
-import { toast } from "react-hot-toast/headless";
+import { notify } from "../utils/notify";
 
 function JobMatch() {
   const [resumeText, setResumeText] = useState("");
@@ -17,9 +17,9 @@ function JobMatch() {
       const data = await api.createJobMatch({ resumeText, jobDescription });
 
       setResult(data.result);
-      toast.success("Resume uploaded successfully");
+      notify.success("Resume uploaded successfully");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload failed");
+      notify.error(error instanceof Error ? error.message : "Upload failed");
     }
   };
 

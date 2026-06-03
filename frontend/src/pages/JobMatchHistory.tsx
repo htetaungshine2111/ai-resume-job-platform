@@ -4,8 +4,9 @@ import SkillList from "../components/SkillList";
 import Modal from "../components/Modal";
 import useJobMatches from "../hooks/useJobMatches";
 import toast from "react-hot-toast";
-import Spinner from "../components/Spinner";
 import { api } from "../services/api";
+import { notify } from "../utils/notify";
+import LoadingSkeleton from "../components/LoadingSkeleton";
 
 type JobMatch = {
   id: number;
@@ -37,7 +38,7 @@ function JobMatchHistory() {
     if (!confirmed) return;
     await api.deleteJobMatch(id);
 
-    toast.success("Job match deleted successfully");
+    notify.success("Job match deleted successfully");
 
     setMatches(matches.filter((match) => match.id !== id));
   };
@@ -66,7 +67,7 @@ function JobMatchHistory() {
           className="w-full border rounded-lg p-3 mb-6"
         />
 
-        {loading && <Spinner />}
+        {loading && <LoadingSkeleton />}
 
         {filteredMatches.length === 0 && <p>No job match history yet.</p>}
 
