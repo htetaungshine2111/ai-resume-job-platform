@@ -523,4 +523,41 @@ router.delete("/interview-questions/:id", authMiddleware, async (req, res) => {
   }
 });
 
+router.put("/interview-questions/:id", authMiddleware, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { interviewTitle } = req.body;
+
+    const interview = await prisma.resumeAnalysis.findFirst({
+      where: {
+        id,
+        userId: req.user.userId,
+      },
+    });
+
+    if (!interview) {
+      return res.status(404).json({
+        message: "Interview questions not found",
+      });
+    }
+
+    const updatedInterview = await prisma.resumeAnalysis.update({
+      where: {
+        id,
+      },
+      data: {
+        interviewTitle,
+      },
+    });
+
+    res.json(updatedInterview);
+  } catch (error) {
+    console.error("UPDATE INTERVIEW ERROR:", error);
+
+    res.status(500).json({
+      message: "Failed to update interview title",
+    });
+  }
+});
+
 module.exports = router;

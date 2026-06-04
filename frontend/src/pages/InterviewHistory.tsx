@@ -16,6 +16,38 @@ function InterviewHistory() {
   const [interviews, setInterviews] = useState<InterviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editedTitle, setEditedTitle] = useState("");
+
+  const handleEdit = (id: number, currentTitle: string) => {
+    setEditingId(id);
+    setEditedTitle(currentTitle);
+  };
+
+  const handleSave = async (id: number) => {
+    try {
+      const updatedInterview = await api.updateInterviewTitle(id, editedTitle);
+
+      setInterviews((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                interviewTitle: updatedInterview.interviewTitle,
+              }
+            : item,
+        ),
+      );
+
+      setEditingId(null);
+
+      notify.success("Interview title updated");
+    } catch (error) {
+      console.error(error);
+
+      notify.error("Failed to update interview title");
+    }
+  };
 
   const handleDelete = async (id: number) => {
     const confirmed = window.confirm(
@@ -96,14 +128,56 @@ function InterviewHistory() {
           >
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-xl font-bold dark:text-white">
-                  {item.interviewTitle || "AI Interview Questions"}
-                </h2>
+                {editingId === item.id ? (
+                  <input
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="
+      border rounded p-2
+      dark:bg-gray-700
+      dark:text-white
+    "
+                  />
+                ) : (
+                  <h2 className="text-xl font-bold dark:text-white">
+                    {item.interviewTitle || "AI Interview Questions"}
+                  </h2>
+                )}
 
                 <p className="text-gray-500 dark:text-gray-400 mt-2">
                   {new Date(item.createdAt).toLocaleString()}
                 </p>
               </div>
+
+              {editingId === item.id ? (
+                <button
+                  onClick={() => handleSave(item.id)}
+                  className="
+      bg-green-500 text-white
+      px-3 py-2 rounded-lg
+      hover:bg-green-600
+    "
+                >
+                  Save
+                </button>
+              ) : (
+                <button
+                  onClick={() =>
+                    handleEdit(
+                      item.id,
+                      item.interviewTitle || "AI Interview Questions",
+                    )
+                  }
+                  className="
+      bg-blue-500 text-white
+      px-3 py-2 rounded-lg
+      hover:bg-blue-600
+    "
+                >
+                  Edit
+                </button>
+              )}
 
               <button
                 onClick={() => handleDelete(item.id)}

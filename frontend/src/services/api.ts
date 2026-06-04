@@ -146,4 +146,13 @@ export const api = {
       method: "DELETE",
     });
   },
+
+  updateInterviewTitle(id: number, interviewTitle: string) {
+    return apiFetch(`/interview-questions/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        interviewTitle,
+      }),
+    });
+  },
 };
