@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import LoadingSkeleton from "../components/LoadingSkeleton";
 import EmptyState from "../components/EmptyState";
+import { notify } from "../utils/notify";
 
 type InterviewItem = {
   id: number;
@@ -15,6 +16,25 @@ function InterviewHistory() {
   const [interviews, setInterviews] = useState<InterviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete these interview questions?",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await api.deleteInterviewQuestions(id);
+
+      setInterviews((prev) => prev.filter((item) => item.id !== id));
+
+      notify.success("Interview questions deleted");
+    } catch (error) {
+      notify.error("Failed to delete interview questions");
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     api
@@ -74,13 +94,29 @@ function InterviewHistory() {
               rounded-xl shadow p-6 mb-6
             "
           >
-            <h2 className="text-xl font-bold dark:text-white">
-              {item.interviewTitle || "AI Interview Questions"}
-            </h2>
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-bold dark:text-white">
+                  {item.interviewTitle || "AI Interview Questions"}
+                </h2>
 
-            <p className="text-gray-500 dark:text-gray-400 mt-2">
-              {new Date(item.createdAt).toLocaleString()}
-            </p>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">
+                  {new Date(item.createdAt).toLocaleString()}
+                </p>
+              </div>
+
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="
+      bg-red-500 text-white
+      px-3 py-2 rounded-lg
+      hover:bg-red-600
+      transition-colors
+    "
+              >
+                Delete
+              </button>
+            </div>
 
             {item.jobDescription && (
               <div className="mt-4">

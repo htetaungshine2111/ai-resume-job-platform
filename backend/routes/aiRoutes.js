@@ -488,4 +488,39 @@ router.get("/interview-questions", authMiddleware, async (req, res) => {
   }
 });
 
+router.delete("/interview-questions/:id", authMiddleware, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const existingInterview = await prisma.resumeAnalysis.findFirst({
+      where: {
+        id,
+        userId: req.user.userId,
+      },
+    });
+
+    if (!existingInterview) {
+      return res.status(404).json({
+        message: "Interview questions not found",
+      });
+    }
+
+    await prisma.resumeAnalysis.delete({
+      where: {
+        id,
+      },
+    });
+
+    res.json({
+      message: "Interview questions deleted successfully",
+    });
+  } catch (error) {
+    console.error("DELETE INTERVIEW QUESTIONS ERROR:", error);
+
+    res.status(500).json({
+      message: "Failed to delete interview questions",
+    });
+  }
+});
+
 module.exports = router;

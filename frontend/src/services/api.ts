@@ -140,4 +140,10 @@ export const api = {
   getInterviewQuestions() {
     return apiFetch("/interview-questions");
   },
+
+  deleteInterviewQuestions(id: number) {
+    return apiFetch(`/interview-questions/${id}`, {
+      method: "DELETE",
+    });
+  },
 };
