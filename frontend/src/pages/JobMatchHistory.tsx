@@ -3,7 +3,6 @@ import MatchScoreBar from "../components/MatchScoreBar";
 import SkillList from "../components/SkillList";
 import Modal from "../components/Modal";
 import useJobMatches from "../hooks/useJobMatches";
-import toast from "react-hot-toast";
 import { api } from "../services/api";
 import { notify } from "../utils/notify";
 import LoadingSkeleton from "../components/LoadingSkeleton";
