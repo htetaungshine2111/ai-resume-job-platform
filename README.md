@@ -12,14 +12,21 @@ https://ai-resume-job-platform-o0ky.onrender.com
 
 ## Screenshots
 
-(Add screenshots here)
+### Home
 
-- Home Page
-- Dashboard
-- Resume Analysis
-- Cover Letter Generator
-- Interview Questions
-- Interview History
+![Home](docs/screenshots/home-page.png)
+
+### Dashboard
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Cover Letter
+
+![Cover Letter](docs/screenshots/cover-letter.png)
+
+### Interview History
+
+![Interview History](docs/screenshots/interview-history.png)
 
 ## Features
 
@@ -100,6 +107,7 @@ https://ai-resume-job-platform-o0ky.onrender.com
 
 ## Architecture
 
+```mermaid
 flowchart TD
 A[React + TypeScript Frontend - Vercel]
 B[Express Backend API - Render]
@@ -111,19 +119,24 @@ A --> B
 B --> C
 C --> D
 B --> E
+```
 
 ## Installation
 
 ### Backend
 
+```bash
 npm install
 npx prisma migrate dev
 npm start
+```
 
 ### Frontend
 
+```bash
 npm install
 npm run dev
+```
 
 ## Future Improvements
 
@@ -141,4 +154,5 @@ Htet Aung Shine
 Software Engineer | Full-Stack Developer
 
 GitHub: https://github.com/htetaungshine2111/ai-resume-job-platform.git
+
 LinkedIn: https://linkedin.com/in/htetaung-shine
